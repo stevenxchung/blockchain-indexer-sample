@@ -1,30 +1,6 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# blockchain-indexer-sample
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
-
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
-
-## Description
-
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Application that emulates indexing of real-time data on the blockchain. We use [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
 ## Installation
 
@@ -58,16 +34,37 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
-## Support
+## Running in Docker
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+1. Build image: `docker build -t blockchain-indexer-sample .`
+2. Run the container: `docker run -p 3000:3000 blockchain-indexer-sample`
 
-## Stay in touch
+## API Design
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+The task was to emulate and process streams of account updates for multiple accounts. Each account stream is treated to be concurrent with another. However, individual updates within a single account stream are treated sequentially in the same order as in the given `data-source.json` with an added delay between 0-1000ms.
 
-## License
+### Design Considerations
 
-Nest is [MIT licensed](LICENSE).
+Setup for present and future state:
+
+- NestJS is easy to setup and provides more structure for building out apps
+- Highly modular structure enables reusability and ease of maintenance as features scale
+- TypeScript support enables developers to write clean type-safe code
+
+Handling real-time events:
+
+- The RxJS library was chosen to help process asynchronous data streams as there were many asynchronous events which could occur simultaneously
+- Factory methods, e.g., `from()` were used to create events with delays (0-1000ms and later based on the callback time provided in each account update)
+- A publish-subscribe pattern was used to handle cases where future unexpired callbacks could be cancelled if an account update with a later version was ingested
+
+Production:
+
+- In addition to the already logged events in this repo, we would add logs for metrics, e.g., CPU utilization, memory utilization, error rates
+- Event tracing could be useful since there could be multiple data source and data sink integrations so it would enhance observability add event tracing to observe how data flows from point A to B
+- Alerts are useful for high and critical failures since they require immediate response from the developer team
+
+Regarding production roll-outs:
+
+- A best practice before a production roll-out is to ensure e2e and performance testing is done and satisfies functional and non-functional requirements in non-production environments first
+- Reviewing the app logs in `logs/app.log` could be useful during a production roll-out to ensure expected output
+- Additionally, monitoring the performance metrics of the app during production roll-out to ensure non-functional requires are met
