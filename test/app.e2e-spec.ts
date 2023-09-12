@@ -15,13 +15,20 @@ describe('App (e2e)', () => {
   });
 
   it('should run the service on initialization', async () => {
-    const loggerSpy = jest.spyOn(Logger.prototype, 'log');
+    const mockLogger = jest.spyOn(Logger.prototype, 'log');
+    const mockProcessExit = jest.spyOn(process, 'exit').mockImplementation();
 
+    // Call main service under test
     await appService.onModuleInit();
 
-    expect(loggerSpy).toHaveBeenCalledWith('Initiate indexing...');
-    expect(loggerSpy).toHaveBeenCalledWith(
+    expect(mockLogger).toHaveBeenCalledWith('Initiate indexing...');
+    expect(mockLogger).toHaveBeenCalledWith(
       'Indexing complete! Printing highest token-value accounts by account type...',
     );
+    expect(mockLogger).toHaveBeenCalledWith(
+      'All tasks complete! Shutting down...',
+    );
+
+    expect(mockProcessExit).toHaveBeenCalledWith(0);
   });
 });

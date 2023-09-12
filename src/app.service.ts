@@ -67,8 +67,20 @@ export class AppService implements OnModuleInit {
    * Triggers on module initialization, builds account streams and stores the latest updates
    */
   async onModuleInit() {
-    this.buildMultiAccountStream();
-    await this.getMultiAccountStream();
+    try {
+      this.buildMultiAccountStream();
+      await this.getMultiAccountStream();
+      this._logger.log('All tasks complete! Shutting down...');
+      // Delay before exiting
+      await new Promise((resolve) => {
+        setTimeout(resolve, 3000);
+      });
+
+      process.exit(0);
+    } catch (error) {
+      this._logger.error(`Error on initialization: ${error}`);
+      process.exit(1);
+    }
   }
 
   /**
@@ -117,7 +129,7 @@ export class AppService implements OnModuleInit {
     // Get highest token-value accounts by account type
     const accountByAccountType: AccountTypeValueMap =
       this.getHighestTokenAccounts(this._lastCommittedAccounts);
-    this._logger.log(accountByAccountType);
+    this._logger.log(JSON.stringify(accountByAccountType, null, 2));
   }
 
   /**
