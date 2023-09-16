@@ -1,4 +1,4 @@
-# blockchain-indexer-sample
+# nodejs-blockchain-indexer
 
 Application that emulates indexing of real-time data on the blockchain. We use [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
@@ -41,7 +41,7 @@ $ npm run test:cov
 
 ## API Design
 
-The task was to emulate and process streams of account updates for multiple accounts. Each account stream is treated to be concurrent with another. However, individual updates within a single account stream are treated sequentially in the same order as in the given `data-source.json` with an added delay between 0-1000ms.
+The goal was to emulate and process streams of account updates for multiple accounts. Each account stream is treated to be concurrent with another. However, individual updates within a single account stream are treated sequentially in the same order as in the given `data-source.json` with an added delay between 0-1000ms.
 
 ### Design Considerations
 
